@@ -5896,7 +5896,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@testing-library/react-hooks@npm:^8.0.1":
+"@testing-library/react-hooks@npm:latest":
   version: 8.0.1
   resolution: "@testing-library/react-hooks@npm:8.0.1"
   dependencies:
@@ -13290,7 +13290,7 @@ __metadata:
     "@commitlint/config-conventional": ^17.7.0
     "@testing-library/dom": ^8.11.4
     "@testing-library/react": ^14.0.0
-    "@testing-library/react-hooks": ^8.0.1
+    "@testing-library/react-hooks": latest
     "@testing-library/user-event": ^14.4.3
     cheerio: ^1.0.0-rc.12
     copyfiles: ^2.4.1
