@@ -8357,7 +8357,7 @@ button.c4p--add-select__global-filter-toggle--open {
   display: flex;
 }
 
-.c4p--web-terminal__documentation-overflow {
+.c4p--web-terminal__documentation-overflow .cds--overflow-menu-options__btn {
   --cds-background: #161616;
   --cds-background-active: rgba(141, 141, 141, 0.4);
   --cds-background-brand: #0f62fe;
@@ -8735,6 +8735,11 @@ button.c4p--add-select__global-filter-toggle--open {
   --cds-border-subtle-selected: var(--cds-border-subtle-selected-01, #c6c6c6);
   --cds-border-strong: var(--cds-border-strong-01, #8d8d8d);
   --cds-border-tile: var(--cds-border-tile-01, #c6c6c6);
+  background-color: var(--cds-layer-01, #f4f4f4);
+  text-decoration: none;
+}
+.c4p--web-terminal__documentation-overflow .cds--overflow-menu-options__btn:hover {
+  background-color: var(--cds-layer-02, #ffffff);
 }
 
 .c4p--web-terminal__body {
