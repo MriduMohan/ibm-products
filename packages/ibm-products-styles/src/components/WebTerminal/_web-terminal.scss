@@ -73,7 +73,7 @@ $block-class: #{$pkg-prefix}--web-terminal;
 .#{$block-class}__actions {
   display: flex;
 
-  .#{$block-class}__documentation-overflow 
+  .#{$block-class}__documentation-overflow
     .#{$carbon-prefix}--overflow-menu-options__btn {
     @include theme($g100);
     background-color: $layer-01;
