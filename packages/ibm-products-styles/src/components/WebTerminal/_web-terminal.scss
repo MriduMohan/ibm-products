@@ -74,14 +74,13 @@ $block-class: #{$pkg-prefix}--web-terminal;
   display: flex;
 }
 
-.#{$block-class}__documentation-overflow 
-  .#{$carbon-prefix}--overflow-menu-options__btn {
-  @include theme($g100);
-  background-color: $layer-01;
+
+.#{$block-class}__documentation-overflow { 
+@include theme($g100); 
+}
+
+.#{$carbon-prefix}--overflow-menu-options__btn {
   text-decoration: none;
-  &:hover {
-  background-color: $layer-02;
-  }
 }
 
 // Terminal body styles
