@@ -1,5 +1,5 @@
 /**
- * Copyright IBM Corp. 2022, 2023
+ * Copyright IBM Corp. 2022, 2024
  *
  * This source code is licensed under the Apache-2.0 license found in the
  * LICENSE file in the root directory of this source tree.
@@ -10,6 +10,7 @@ import {
   DATE,
   DROPDOWN,
   FLYOUT,
+  MULTISELECT,
   NUMBER,
   PANEL,
   RADIO,
@@ -28,8 +29,8 @@ const applyInitialFilters = (filterState, initialFilters) => {
 // This functions takes the filters passed in and makes an object to track it's state
 export const getInitialStateFromFilters = (
   filters,
-  variation = FLYOUT,
-  initialFilters = []
+  variation,
+  initialFilters
 ) => {
   const initialFilterState = {};
 
@@ -65,6 +66,15 @@ export const getInitialStateFromFilters = (
         value: '',
         type,
       };
+    } else if (type === MULTISELECT) {
+      initialFilterState[column] = {
+        value: props.MultiSelect.items.map((item) => ({
+          id: typeof item === 'string' ? item : item.id,
+          value: typeof item === 'string' ? item : item.text,
+          selected: false,
+        })),
+        type,
+      };
     }
   };
 
@@ -74,8 +84,6 @@ export const getInitialStateFromFilters = (
     filters.forEach(({ filters: sections = [] }) => {
       sections.forEach(({ filter }) => setInitialState(filter));
     });
-  } else {
-    console.error('No variation passed into useInitialStateFromFilters');
   }
 
   if (initialFilters.length > 0) {

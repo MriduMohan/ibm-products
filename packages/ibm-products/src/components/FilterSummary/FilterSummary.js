@@ -1,15 +1,23 @@
 /**
- * Copyright IBM Corp. 2022, 2022
+ * Copyright IBM Corp. 2022, 2024
  *
  * This source code is licensed under the Apache-2.0 license found in the
  * LICENSE file in the root directory of this source tree.
  */
-import { Button } from '@carbon/react';
-import React from 'react';
+
+import React, { useRef, useState } from 'react';
+import { Button, IconButton } from '@carbon/react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ChevronDown } from '@carbon/react/icons';
 import PropTypes from 'prop-types';
 import cx from 'classnames';
 import { TagSet } from '../TagSet';
 import { pkg } from '../../settings';
+import uuidv4 from '../../global/js/utils/uuidv4';
+import { DURATIONS, EASINGS } from '../../global/js/utils/motionConstants';
+import { useWindowResize, usePreviousValue } from '../../global/js/hooks';
+import debounce from 'lodash/debounce';
+import { getDevtoolsProps } from '../../global/js/utils/devtools';
 
 const blockClass = `${pkg.prefix}--filter-summary`;
 
@@ -18,13 +26,16 @@ let FilterSummary = React.forwardRef(
     {
       className = '',
       clearFiltersText = 'Clear filters',
-      clearFilters = () => {},
-      filters = [],
+      clearFilters,
+      filters,
       renderLabel = null,
       overflowType = 'default',
+      clearButtonInline = true,
+      ...rest
     },
     ref
   ) => {
+    const filterSummaryId = `${blockClass}__${uuidv4()}`;
     const tagFilters = filters.map(({ key, value, ...rest }) => {
       return {
         ...rest,
@@ -33,8 +44,51 @@ let FilterSummary = React.forwardRef(
       };
     });
 
-    return (
-      <div ref={ref} className={cx([blockClass, className])}>
+    const filterSummaryClearButton = useRef();
+    const viewAllButtonRef = useRef();
+    const filterSummaryRef = useRef();
+    const localRef = filterSummaryRef || ref;
+    const [overflowCount, setOverflowCount] = useState(0);
+    const [multiline, setMultiline] = useState(false);
+    const previousState = usePreviousValue({ multiline });
+
+    const handleViewAll = () => {
+      if (overflowCount === 0) {
+        setMultiline(false);
+        return;
+      }
+      setMultiline((prev) => !prev);
+    };
+
+    const viewAllWidth =
+      typeof viewAllButtonRef?.current?.offsetWidth === 'undefined'
+        ? 0
+        : overflowCount > 0
+        ? 48
+        : 0;
+    const measurementOffset =
+      filterSummaryClearButton?.current?.offsetWidth + viewAllWidth;
+
+    const renderTagSet = (type) => (
+      <motion.div
+        key={type}
+        initial={{
+          opacity: 0,
+          y: -16,
+        }}
+        animate={{
+          opacity: 1,
+          y: 0,
+        }}
+        exit={{
+          opacity: 0,
+          y: -16,
+        }}
+        transition={{
+          duration: DURATIONS.moderate01,
+          ease: EASINGS.productive.entrance,
+        }}
+      >
         <TagSet
           allTagsModalSearchLabel="Search all tags"
           allTagsModalSearchPlaceholderText="Search all tags"
@@ -42,10 +96,71 @@ let FilterSummary = React.forwardRef(
           showAllTagsLabel="View all tags"
           tags={tagFilters}
           overflowType={overflowType}
+          className={cx({
+            [`${blockClass}__clear-button-inline`]: clearButtonInline,
+          })}
+          containingElementRef={localRef}
+          measurementOffset={measurementOffset}
+          onOverflowTagChange={(overflowTags) =>
+            setOverflowCount(overflowTags.length)
+          }
+          multiline={multiline}
         />
-        <Button kind="ghost" size="sm" onClick={clearFilters}>
+      </motion.div>
+    );
+
+    useWindowResize(() => {
+      const handleFilterSummaryResize = () => {
+        if (multiline && localRef?.current?.offsetHeight <= 50) {
+          setMultiline(false);
+        }
+      };
+      const filterResize = debounce(handleFilterSummaryResize, 500);
+      filterResize();
+    }, [previousState?.multiline, multiline]);
+
+    return (
+      <div
+        {...getDevtoolsProps(componentName)}
+        id={filterSummaryId}
+        {...rest}
+        ref={localRef}
+        className={cx([blockClass, className], {
+          [`${blockClass}__expanded`]: multiline,
+        })}
+      >
+        <AnimatePresence mode="wait" exitBeforeEnter>
+          {!multiline && renderTagSet('single')}
+          {multiline && renderTagSet('multiline')}
+        </AnimatePresence>
+        <Button
+          kind="ghost"
+          size="sm"
+          onClick={clearFilters}
+          ref={filterSummaryClearButton}
+          className={`${blockClass}__clear-all-button`}
+        >
           {clearFiltersText}
         </Button>
+        {(overflowCount > 0 || multiline) && (
+          <div className={`${blockClass}__view-all--wrapper`}>
+            <IconButton
+              ref={viewAllButtonRef}
+              kind="ghost"
+              label={'View all'}
+              className={`${blockClass}__view-all--trigger`}
+              align="left"
+              onClick={handleViewAll}
+              size="sm"
+            >
+              <ChevronDown
+                className={cx(`${blockClass}__view-all--chevron`, {
+                  [`${blockClass}__view-all--chevron-multiline`]: multiline,
+                })}
+              />
+            </IconButton>
+          </div>
+        )}
       </div>
     );
   }
@@ -56,6 +171,7 @@ FilterSummary.displayName = componentName;
 
 FilterSummary.propTypes = {
   className: PropTypes.string,
+  clearButtonInline: PropTypes.bool,
   clearFilters: PropTypes.func.isRequired,
   clearFiltersText: PropTypes.string,
   filters: PropTypes.arrayOf(PropTypes.object).isRequired,

@@ -32,7 +32,7 @@ import { clearSingleFilter } from './addons/Filtering/FilterProvider';
 const blockClass = `${pkg.prefix}--datagrid`;
 const gcClass = `${blockClass}__grid-container`;
 
-export const DatagridContent = ({ datagridState, title }) => {
+export const DatagridContent = ({ datagridState, title, ariaToolbarLabel }) => {
   const { state: inlineEditState, dispatch } = useContext(InlineEditContext);
   const { filterTags, EventEmitter, panelOpen } = useContext(FilterContext);
   const { activeCellId, gridActive, editId } = inlineEditState;
@@ -84,43 +84,46 @@ export const DatagridContent = ({ datagridState, title }) => {
 
   const renderTable = () => {
     return (
-      <Table
-        {...getTableProps()}
-        className={cx(
-          withVirtualScroll ? '' : `${blockClass}__table-simple`,
-          `${blockClass}__vertical-align-${verticalAlign}`,
-          { [`${blockClass}__variable-row-height`]: variableRowHeight },
-          { [`${blockClass}__table-with-inline-edit`]: withInlineEdit },
-          { [`${blockClass}__table-grid-active`]: gridActive },
-          {
-            [`${blockClass}__table-is-resizing`]:
-              typeof columnResizing.isResizingColumn === 'string',
-          },
-          getTableProps()?.className
-        )}
-        role={withInlineEdit ? 'grid' : undefined}
-        tabIndex={withInlineEdit ? 0 : -1}
-        onKeyDown={
-          /* istanbul ignore next */
-          withInlineEdit &&
-          ((event) =>
-            handleGridKeyPress({
-              event,
-              dispatch,
-              instance: datagridState,
-              keysPressedList,
-              state: inlineEditState,
-              usingMac,
-            }))
-        }
-        onFocus={
-          withInlineEdit && (() => handleGridFocus(inlineEditState, dispatch))
-        }
-        title={title}
-      >
-        {!withVirtualScroll && <DatagridHead {...datagridState} />}
-        <DatagridBody {...datagridState} rows={contentRows} />
-      </Table>
+      <>
+        <Table
+          {...getTableProps()}
+          className={cx(
+            withVirtualScroll ? '' : `${blockClass}__table-simple`,
+            `${blockClass}__vertical-align-${verticalAlign}`,
+            { [`${blockClass}__variable-row-height`]: variableRowHeight },
+            { [`${blockClass}__table-with-inline-edit`]: withInlineEdit },
+            { [`${blockClass}__table-grid-active`]: gridActive },
+            {
+              [`${blockClass}__table-is-resizing`]:
+                typeof columnResizing?.isResizingColumn === 'string',
+            },
+            getTableProps()?.className
+          )}
+          role={withInlineEdit ? 'grid' : undefined}
+          tabIndex={withInlineEdit ? 0 : -1}
+          onKeyDown={
+            /* istanbul ignore next */
+            withInlineEdit &&
+            ((event) =>
+              handleGridKeyPress({
+                event,
+                dispatch,
+                instance: datagridState,
+                keysPressedList,
+                state: inlineEditState,
+                usingMac,
+              }))
+          }
+          onFocus={
+            withInlineEdit && (() => handleGridFocus(inlineEditState, dispatch))
+          }
+          title={title}
+        >
+          {!withVirtualScroll && <DatagridHead {...datagridState} />}
+          <DatagridBody {...datagridState} rows={contentRows} />
+        </Table>
+        {filterProps?.variation === 'panel' && renderPagination()}
+      </>
     );
   };
 
@@ -155,7 +158,6 @@ export const DatagridContent = ({ datagridState, title }) => {
     clearSingleFilter(id, setAllFilters, state)
   );
 
-  /* istanbul ignore next */
   const renderFilterSummary = () =>
     state.filters.length > 0 && (
       <FilterSummary
@@ -166,6 +168,12 @@ export const DatagridContent = ({ datagridState, title }) => {
         overflowType="tag"
       />
     );
+
+  const renderPagination = () => {
+    if (contentRows?.length > 0 && !isFetching && DatagridPagination) {
+      return <DatagridPagination {...datagridState} />;
+    }
+  };
 
   return (
     <>
@@ -183,7 +191,10 @@ export const DatagridContent = ({ datagridState, title }) => {
         title={gridTitle}
         description={gridDescription}
       >
-        <DatagridToolbar {...datagridState} />
+        <DatagridToolbar
+          {...datagridState}
+          ariaToolbarLabel={ariaToolbarLabel}
+        />
         <div
           className={cx(`${blockClass}__table-container`, {
             [`${blockClass}__table-container--filter-open`]: panelOpen,
@@ -192,11 +203,11 @@ export const DatagridContent = ({ datagridState, title }) => {
         >
           {filterProps?.variation === 'panel' && (
             <FilterPanel
-              updateMethod="batch"
               {...getFilterFlyoutProps()}
               title={filterProps.panelTitle}
               filterSections={filterProps.sections}
               autoHideFilters={filterProps.autoHideFilters}
+              isFetching={isFetching}
             />
           )}
           <div className={`${blockClass}__table-container-inner`}>
@@ -216,9 +227,7 @@ export const DatagridContent = ({ datagridState, title }) => {
           </div>
         </div>
       </TableContainer>
-      {contentRows?.length > 0 && !isFetching && DatagridPagination && (
-        <DatagridPagination {...datagridState} />
-      )}
+      {filterProps?.variation !== 'panel' && renderPagination()}
       {CustomizeColumnsTearsheet && (
         <CustomizeColumnsTearsheet instance={datagridState} />
       )}
@@ -227,6 +236,7 @@ export const DatagridContent = ({ datagridState, title }) => {
 };
 
 DatagridContent.propTypes = {
+  ariaToolbarLabel: PropTypes.string,
   datagridState: PropTypes.shape({
     getTableProps: PropTypes.func,
     getFilterFlyoutProps: PropTypes.func,

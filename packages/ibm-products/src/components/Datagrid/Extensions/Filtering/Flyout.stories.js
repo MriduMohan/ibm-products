@@ -1,14 +1,15 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 /**
- * Copyright IBM Corp. 2022, 2023
+ * Copyright IBM Corp. 2022, 2024
  *
  * This source code is licensed under the Apache-2.0 license found in the
  * LICENSE file in the root directory of this source tree.
  */
 
+/* eslint-disable react-hooks/exhaustive-deps */
+
 import React, { useState } from 'react';
 import { Tooltip } from '@carbon/react';
-import { Add } from '@carbon/react/icons';
+import { getBatchActions } from '../../Datagrid.stories';
 import { action } from '@storybook/addon-actions';
 import {
   getStoryTitle,
@@ -26,7 +27,8 @@ import { makeData } from '../../utils/makeData';
 import { ARG_TYPES } from '../../utils/getArgTypes';
 import { DatagridActions } from '../../utils/DatagridActions';
 import { StatusIcon } from '../../../StatusIcon';
-import { pkg } from '../../../../settings';
+import { handleFilterTagLabelText } from '../../utils/handleFilterTagLabelText';
+import { getDateFormat, multiSelectProps } from './Panel.stories';
 
 export default {
   title: `${getStoryTitle(Datagrid.displayName)}/Extensions/Flyout`,
@@ -44,41 +46,10 @@ export default {
       },
     },
   },
+  excludeStories: ['FilteringUsage', 'filterProps'],
 };
 
-const getBatchActions = () => {
-  return [
-    {
-      label: 'Duplicate',
-      renderIcon: () => <Add size={16} />,
-      onClick: action('Clicked batch action button'),
-    },
-    {
-      label: 'Add',
-      renderIcon: () => <Add size={16} />,
-      onClick: action('Clicked batch action button'),
-    },
-    {
-      label: 'Publish to catalog',
-      renderIcon: () => <Add size={16} />,
-      onClick: action('Clicked batch action button'),
-    },
-    {
-      label: 'Download',
-      renderIcon: () => <Add size={16} />,
-      onClick: action('Clicked batch action button'),
-    },
-    {
-      label: 'Delete',
-      renderIcon: () => <Add size={16} />,
-      onClick: action('Clicked batch action button'),
-      hasDivider: true,
-      kind: 'danger',
-    },
-  ];
-};
-
-const FilteringUsage = ({ defaultGridProps }) => {
+export const FilteringUsage = ({ defaultGridProps }) => {
   const {
     gridDescription,
     gridTitle,
@@ -118,6 +89,7 @@ const FilteringUsage = ({ defaultGridProps }) => {
     {
       Header: 'Status',
       accessor: 'status',
+      filter: 'multiSelect',
     },
     // Shows the date filter example
     {
@@ -179,12 +151,6 @@ const FilteringUsage = ({ defaultGridProps }) => {
     useColumnCenterAlign
   );
 
-  // Warnings are ordinarily silenced in storybook, add this to test
-  pkg._silenceWarnings(false);
-  // Enable feature flag for `useFiltering` hook
-  pkg.feature['Datagrid.useFiltering'] = true;
-  pkg._silenceWarnings(true);
-
   return <Datagrid datagridState={datagridState} />;
 };
 
@@ -199,16 +165,18 @@ const filters = [
     props: {
       DatePicker: {
         datePickerType: 'range',
+        locale: navigator?.language || 'en',
+        dateFormat: getDateFormat(navigator?.language || 'en'),
       },
       DatePickerInput: {
         start: {
           id: 'date-picker-input-id-start',
-          placeholder: 'mm/dd/yyyy',
+          placeholder: getDateFormat(navigator?.language || 'en', true),
           labelText: 'Joined start date',
         },
         end: {
           id: 'date-picker-input-id-end',
-          placeholder: 'mm/dd/yyyy',
+          placeholder: getDateFormat(navigator?.language || 'en', true),
           labelText: 'Joined end date',
         },
       },
@@ -285,15 +253,11 @@ const filters = [
     },
   },
   {
-    type: 'dropdown',
+    type: 'multiSelect',
     column: 'status',
     props: {
-      Dropdown: {
-        id: 'marital-status-dropdown',
-        ariaLabel: 'Marital status dropdown',
-        items: ['relationship', 'complicated', 'single'],
-        label: 'Marital status',
-        titleText: 'Marital status',
+      MultiSelect: {
+        ...multiSelectProps,
       },
     },
   },
@@ -323,8 +287,8 @@ export const FlyoutBatch = prepareStory(FilteringTemplateWrapper, {
       onFlyoutOpen: action('onFlyoutOpen'),
       onFlyoutClose: action('onFlyoutClose'),
       filters,
+      renderLabel: (key, value) => handleFilterTagLabelText(key, value),
     },
-    featureFlags: ['Datagrid.useFiltering'],
   },
 });
 
@@ -352,10 +316,22 @@ export const FlyoutInstant = prepareStory(FilteringTemplateWrapper, {
       onFlyoutOpen: action('onFlyoutOpen'),
       onFlyoutClose: action('onFlyoutClose'),
       filters,
+      renderLabel: (key, value) => handleFilterTagLabelText(key, value),
     },
-    featureFlags: ['Datagrid.useFiltering'],
   },
 });
+
+export const filterProps = {
+  variation: 'flyout',
+  updateMethod: 'instant',
+  primaryActionLabel: 'Apply',
+  secondaryActionLabel: 'Cancel',
+  flyoutIconDescription: 'Open filters',
+  onFlyoutOpen: action('onFlyoutOpen'),
+  onFlyoutClose: action('onFlyoutClose'),
+  filters,
+  renderLabel: (key, value) => handleFilterTagLabelText(key, value),
+};
 
 export const FlyoutWithInitialFilters = prepareStory(FilteringTemplateWrapper, {
   storyName: 'Filter flyout with initial filters',
@@ -381,16 +357,6 @@ export const FlyoutWithInitialFilters = prepareStory(FilteringTemplateWrapper, {
     emptyStateTitle: 'No filters match',
     emptyStateDescription:
       'Data was not found with the current filters applied. Change filters or clear filters to see other results.',
-    filterProps: {
-      variation: 'flyout',
-      updateMethod: 'instant',
-      primaryActionLabel: 'Apply',
-      secondaryActionLabel: 'Cancel',
-      flyoutIconDescription: 'Open filters',
-      onFlyoutOpen: action('onFlyoutOpen'),
-      onFlyoutClose: action('onFlyoutClose'),
-      filters,
-    },
-    featureFlags: ['Datagrid.useFiltering'],
+    filterProps,
   },
 });

@@ -1,16 +1,17 @@
 /**
- * Copyright IBM Corp. 2020, 2023
+ * Copyright IBM Corp. 2020, 2024
  *
  * This source code is licensed under the Apache-2.0 license found in the
  * LICENSE file in the root directory of this source tree.
  */
 
-import React from 'react';
+import React, { isValidElement } from 'react';
 import { TableRow, TableCell, SkeletonText } from '@carbon/react';
 import { px } from '@carbon/layout';
 import { selectionColumnId } from '../common-column-ids';
 import cx from 'classnames';
 import { pkg, carbon } from '../../../settings';
+import { DatagridSlug } from './addons/Slug/DatagridSlug';
 
 const blockClass = `${pkg.prefix}--datagrid`;
 
@@ -26,12 +27,16 @@ const rowHeights = {
 const DatagridRow = (datagridState) => {
   const {
     row,
+    rows,
     rowSize,
     withNestedRows,
     prepareRow,
     key,
     tableId,
     withExpandedRows,
+    withMouseHover,
+    setMouseOverRowIndex,
+    headers,
   } = datagridState;
 
   const getVisibleNestedRowCount = ({ isExpanded, subRows }) => {
@@ -91,6 +96,9 @@ const DatagridRow = (datagridState) => {
   };
 
   const handleMouseLeave = (event) => {
+    if (withMouseHover) {
+      setMouseOverRowIndex(null);
+    }
     const hoverRow = event.target.closest(
       `.${blockClass}__carbon-row-expanded`
     );
@@ -109,12 +117,6 @@ const DatagridRow = (datagridState) => {
     }
   };
 
-  const rowClassNames = cx(`${blockClass}__carbon-row`, {
-    [`${blockClass}__carbon-row-expanded`]: row.isExpanded,
-    [`${blockClass}__carbon-row-expandable`]: row.canExpand,
-    [`${carbon.prefix}--data-table--selected`]: row.isSelected,
-  });
-
   const setAdditionalRowProps = () => {
     if (withNestedRows || withExpandedRows) {
       return {
@@ -124,11 +126,22 @@ const DatagridRow = (datagridState) => {
     return {};
   };
 
+  // eslint-disable-next-line no-unused-vars
+  const { role, className, ...rowProps } = row.getRowProps();
+  const foundAIRow = rows.some((r) => isValidElement(r?.original?.slug));
+
+  const rowClassNames = cx(`${blockClass}__carbon-row`, {
+    [`${blockClass}__carbon-row-expanded`]: row.isExpanded,
+    [`${blockClass}__carbon-row-expandable`]: row.canExpand,
+    [`${carbon.prefix}--data-table--selected`]: row.isSelected,
+    [`${blockClass}__slug--row`]: isValidElement(row?.original?.slug),
+  });
+
   return (
     <React.Fragment key={key}>
       <TableRow
-        className={rowClassNames}
-        {...row.getRowProps()}
+        {...rowProps}
+        className={cx(rowClassNames, className)}
         key={row.id}
         onMouseEnter={hoverHandler}
         onMouseLeave={handleMouseLeave}
@@ -137,9 +150,23 @@ const DatagridRow = (datagridState) => {
         onKeyUp={handleOnKeyUp}
         {...setAdditionalRowProps()}
       >
+        {foundAIRow ? (
+          row?.original?.slug ? (
+            <td
+              className={cx(`${blockClass}__table-row-ai-enabled`, {
+                [`${blockClass}__slug--expanded`]: row.isExpanded,
+              })}
+            >
+              <DatagridSlug slug={row?.original?.slug} />
+            </td>
+          ) : (
+            <td className={`${blockClass}__table-row-ai-spacer`} />
+          )
+        ) : null}
         {row.cells.map((cell, index) => {
           const cellProps = cell.getCellProps();
-          const { children, ...restProps } = cellProps;
+          // eslint-disable-next-line no-unused-vars
+          const { children, role, ...restProps } = cellProps;
           const content = children || (
             <>
               {!row.isSkeleton && cell.render('Cell')}
@@ -150,14 +177,25 @@ const DatagridRow = (datagridState) => {
             // directly render component without the wrapping TableCell
             return cell.render('Cell', { key: cell.column.id });
           }
+          const title = content?.props?.children[0]?.props?.value;
+          const associatedHeader = headers.filter(
+            (h) => h.id === cell.column.id
+          );
           return (
             <TableCell
               className={cx(`${blockClass}__cell`, {
                 [`${blockClass}__expandable-row-cell`]:
                   row.canExpand && index === 0,
+                [`${blockClass}__expandable-row-cell--is-expanded`]:
+                  row.isExpanded && index === 0,
+                [`${blockClass}__slug--cell`]:
+                  associatedHeader &&
+                  associatedHeader.length &&
+                  isValidElement(associatedHeader[0]?.slug),
               })}
               {...restProps}
               key={cell.column.id}
+              title={title}
             >
               {content}
             </TableCell>

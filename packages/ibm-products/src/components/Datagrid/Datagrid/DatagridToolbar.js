@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
+import PropTypes from 'prop-types';
 import {
   TableToolbar,
   TableBatchActions,
@@ -103,6 +104,7 @@ const DatagridBatchActionsToolbar = (datagridState, width, ref) => {
             [`${menuClass}-icon-only`]: width <= minWidthBeforeOverflowIcon,
           },
         ])}
+        tabIndex={totalSelected > 0 ? 0 : -1}
       >
         {toolbarBatchActions?.map((batchAction, index) => {
           const hidden = index < 2 && !displayAllInMenu;
@@ -122,6 +124,12 @@ const DatagridBatchActionsToolbar = (datagridState, width, ref) => {
   };
 
   const onCancelHandler = () => {
+    handleSelectAllRowData({
+      dispatch,
+      rows: [],
+      getRowId,
+      isChecked: false,
+    });
     toggleAllRowsSelected(false);
     setGlobalFilter(null);
   };
@@ -161,6 +169,7 @@ const DatagridBatchActionsToolbar = (datagridState, width, ref) => {
                 renderIcon={batchAction.renderIcon}
                 onClick={(event) => onClickHandler(event, batchAction)}
                 iconDescription={batchAction.label}
+                tabIndex={totalSelected > 0 ? 0 : -1}
               >
                 {batchAction.label}
               </TableBatchAction>
@@ -172,7 +181,7 @@ const DatagridBatchActionsToolbar = (datagridState, width, ref) => {
   );
 };
 
-const DatagridToolbar = (datagridState) => {
+const DatagridToolbar = ({ ariaToolbarLabel, ...datagridState }) => {
   const ref = useRef(null);
   const { width } = useResizeObserver(ref);
   const { DatagridActions, DatagridBatchActions, batchActions, rowSize } =
@@ -185,20 +194,24 @@ const DatagridToolbar = (datagridState) => {
       ref={ref}
       className={cx([blockClass, `${blockClass}--${getRowHeight}`])}
     >
-      <TableToolbar>
-        {DatagridActions && DatagridActions(datagridState)}
+      <TableToolbar aria-label={ariaToolbarLabel}>
+        {DatagridActions && <DatagridActions {...datagridState} />}
         {DatagridBatchActionsToolbar &&
           DatagridBatchActionsToolbar(datagridState, width, ref)}
       </TableToolbar>
     </div>
   ) : DatagridActions ? (
     <div className={blockClass}>
-      <TableToolbar>
-        {DatagridActions && DatagridActions(datagridState)}
+      <TableToolbar aria-label={ariaToolbarLabel}>
+        {DatagridActions && <DatagridActions {...datagridState} />}
         {DatagridBatchActions && DatagridBatchActions(datagridState)}
       </TableToolbar>
     </div>
   ) : null;
+};
+
+DatagridToolbar.propTypes = {
+  ariaToolbarLabel: PropTypes.string,
 };
 
 export default DatagridToolbar;

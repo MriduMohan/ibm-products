@@ -1,3 +1,10 @@
+/**
+ * Copyright IBM Corp. 2023, 2024
+ *
+ * This source code is licensed under the Apache-2.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import React from 'react';
 import { StoryDocsPage } from '../../../../global/js/utils/StoryDocsPage';
 
@@ -280,6 +287,12 @@ const filters = [
           // Add any other Carbon RadioButton props here
         },
       ],
+      DefaultRadioButton: {
+        id: 'any__unique-id-for-any-radio-button',
+        labelText: 'Any',
+        value: 'Any',
+        // Add any other Carbon RadioButton props here
+      }
     },
   },
   {
@@ -296,6 +309,24 @@ const filters = [
       },
     },
   },
+  {
+    type: 'multiSelect',
+    column: 'status',
+    props: {
+      MultiSelect: {
+        items: [
+          { text: 'relationship', id: 'relationship' },
+          { text: 'complicated', id: 'complicated' },
+          { text: 'single', id: 'single' },
+        ],
+        id: 'carbon-multiselect-example',
+        label: 'Status selection',
+        titleText: 'Multiselect title',
+        itemToString: (item) => (item ? item.text : ''),
+        // Add any other Carbon MultiSelect props here
+      },
+    },
+  },
 ];
           `,
         },
@@ -303,6 +334,19 @@ const filters = [
       {
         subTitle: 'Create your filters for panel variant',
         description: 'Filter panel coming soon.',
+      },
+      {
+        subTitle: 'Customizing the filter tag labels',
+        description:
+          'You can customize the rendering of the filter tag labels by supplying the `renderLabel` property to your `filterProps` as seen below. Otherwise it will default to `key: value`.',
+        source: {
+          code: `
+filterProps: {
+  ...otherFilterProps,
+  renderLabel: (key, value) => myCustomTagLabelFormatter(key, value),
+},
+          `,
+        },
       },
       {
         subTitle: 'Putting it all together',
@@ -360,6 +404,8 @@ filterProps: {
   flyoutIconDescription: string,
   /** Array of objects to render filters in flyout */
   filters: object[]
+  /** Applies custom formatting to filter tags */
+  renderLabel: Function
 }
           `,
         },

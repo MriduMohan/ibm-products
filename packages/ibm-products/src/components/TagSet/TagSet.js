@@ -1,5 +1,5 @@
 //
-// Copyright IBM Corp. 2020, 2022
+// Copyright IBM Corp. 2020, 2024
 //
 // This source code is licensed under the Apache-2.0 license found in the
 // LICENSE file in the root directory of this source tree.
@@ -27,8 +27,10 @@ const allTagsModalSearchThreshold = 10;
 // Default values for props
 const defaults = {
   align: 'start',
+  measurementOffset: 0,
   overflowAlign: 'bottom',
   overflowType: 'default',
+  onOverflowTagChange: () => {},
 };
 
 export let TagSet = React.forwardRef(
@@ -49,6 +51,9 @@ export let TagSet = React.forwardRef(
       allTagsModalSearchPlaceholderText,
       showAllTagsLabel,
       tags,
+      containingElementRef,
+      measurementOffset = defaults.measurementOffset,
+      onOverflowTagChange = defaults.onOverflowTagChange,
 
       // Collect any other property values passed in.
       ...rest
@@ -65,6 +70,8 @@ export let TagSet = React.forwardRef(
     const displayedArea = useRef(null);
     const [sizingTags, setSizingTags] = useState([]);
     const overflowTag = useRef(null);
+
+    const [popoverOpen, setPopoverOpen] = useState(false);
 
     const handleShowAllClick = () => {
       setShowAllModalOpen(true);
@@ -96,12 +103,26 @@ export let TagSet = React.forwardRef(
       setSizingTags(newSizingTags);
     }, [tags]);
 
+    const handleTagOnClose = useCallback(
+      (onClose, index) => {
+        onClose?.();
+        if (index <= displayCount - 1) {
+          setPopoverOpen(false);
+        }
+      },
+      [displayCount]
+    );
+
     useEffect(() => {
       // create visible and overflow tags
       let newDisplayedTags =
         tags && tags.length > 0
-          ? tags.map(({ label, ...other }, index) => (
-              <Tag {...other} key={`displayed-tag-${index}`}>
+          ? tags.map(({ label, onClose, ...other }, index) => (
+              <Tag
+                {...other}
+                key={`displayed-tag-${index}`}
+                onClose={() => handleTagOnClose(onClose, index)}
+              >
                 {label}
               </Tag>
             ))
@@ -131,9 +152,12 @@ export let TagSet = React.forwardRef(
           showAllTagsLabel={showAllTagsLabel}
           key="displayed-tag-overflow"
           ref={overflowTag}
+          popoverOpen={popoverOpen}
+          setPopoverOpen={setPopoverOpen}
         />
       );
 
+      onOverflowTagChange?.(newOverflowTags);
       setDisplayedTags(newDisplayedTags);
     }, [
       displayCount,
@@ -142,6 +166,9 @@ export let TagSet = React.forwardRef(
       overflowType,
       showAllTagsLabel,
       tags,
+      onOverflowTagChange,
+      popoverOpen,
+      handleTagOnClose,
     ]);
 
     const checkFullyVisibleTags = useCallback(() => {
@@ -153,7 +180,12 @@ export let TagSet = React.forwardRef(
       let willFit = 0;
 
       if (sizingTags.length > 0) {
-        let spaceAvailable = tagSetRef.current.offsetWidth;
+        const optionalContainingElement = containingElementRef?.current;
+        const measurementOffsetValue =
+          typeof measurementOffset === 'number' ? measurementOffset : 0;
+        let spaceAvailable = optionalContainingElement
+          ? optionalContainingElement.offsetWidth - measurementOffsetValue
+          : tagSetRef.current.offsetWidth;
 
         for (let i in sizingTags) {
           const tagWidth = sizingTags[i]?.offsetWidth || 0;
@@ -183,7 +215,14 @@ export let TagSet = React.forwardRef(
       } else {
         setDisplayCount(maxVisible ? Math.min(willFit, maxVisible) : willFit);
       }
-    }, [maxVisible, multiline, sizingTags, tagSetRef]);
+    }, [
+      maxVisible,
+      multiline,
+      sizingTags,
+      tagSetRef,
+      measurementOffset,
+      containingElementRef,
+    ]);
 
     useEffect(() => {
       checkFullyVisibleTags();
@@ -209,7 +248,10 @@ export let TagSet = React.forwardRef(
 
     useResizeObserver(sizingContainerRef, handleSizerTagsResize);
 
-    useResizeObserver(tagSetRef, handleResize);
+    const resizeOption = containingElementRef
+      ? containingElementRef
+      : tagSetRef;
+    useResizeObserver(resizeOption, handleResize);
 
     return (
       <div
@@ -313,13 +355,27 @@ TagSet.propTypes = {
    */
   className: PropTypes.string,
   /**
+   * Optional ref for custom resize container to measure available space
+   * Default will measure the available space of the TagSet container itself.
+   */
+  containingElementRef: PropTypes.object,
+  /**
    * maximum visible tags
    */
   maxVisible: PropTypes.number,
   /**
+   * Specify offset amount for measure available space, only used when `containingElementSelector`
+   * is also provided
+   */
+  measurementOffset: PropTypes.number,
+  /**
    * display tags in multiple lines
    */
   multiline: PropTypes.bool,
+  /**
+   * Handler to get overflow tags
+   */
+  onOverflowTagChange: PropTypes.func,
   /**
    * overflowAlign from the standard tooltip. Default center.
    */

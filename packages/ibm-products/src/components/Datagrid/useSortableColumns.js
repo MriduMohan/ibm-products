@@ -1,5 +1,5 @@
 /**
- * Copyright IBM Corp. 2020, 2023
+ * Copyright IBM Corp. 2020, 2024
  *
  * This source code is licensed under the Apache-2.0 license found in the
  * LICENSE file in the root directory of this source tree.
@@ -11,6 +11,7 @@ import { pkg, carbon } from '../../settings';
 import { Button } from '@carbon/react';
 import { ArrowUp, ArrowDown, ArrowsVertical } from '@carbon/react/icons';
 import { SelectAll } from './Datagrid/DatagridSelectAll';
+import { DatagridSlug } from './Datagrid/addons/Slug/DatagridSlug';
 
 const blockClass = `${pkg.prefix}--datagrid`;
 
@@ -18,6 +19,22 @@ const ordering = {
   ASC: 'ASC',
   DESC: 'DESC',
   NONE: 'NONE',
+};
+
+export const getNewSortOrder = (sortOrder) => {
+  const order = {
+    newSortDesc: undefined,
+    newOrder: ordering.NONE,
+  };
+  if (sortOrder === false || sortOrder === ordering.DESC) {
+    order.newOrder = ordering.DESC;
+    order.newSortDesc = true;
+  }
+  if (sortOrder === undefined || sortOrder === ordering.ASC) {
+    order.newOrder = ordering.ASC;
+    order.newSortDesc = false;
+  }
+  return order;
 };
 
 const getAriaSortValue = (
@@ -62,7 +79,15 @@ const useSortableColumns = (hooks) => {
       descendingSortableLabelText,
       defaultSortableLabelText,
     } = instance;
-    const onSortClick = (column) => {
+    const onSortClick = (event, column) => {
+      const slug =
+        event.target.classList.contains(`${carbon.prefix}--slug`) ||
+        event.target.closest(`.${carbon.prefix}--slug`);
+      // Do not continue with sorting if we find a slug
+      if (slug) {
+        event.stopPropagation();
+        return;
+      }
       const key = column.id;
       const sortDesc = column.isSortedDesc;
       const { newSortDesc, newOrder } = getNewSortOrder(sortDesc);
@@ -91,8 +116,10 @@ const useSortableColumns = (hooks) => {
         return <ArrowsVertical {...iconProps} />;
       };
       const Header = (headerProp) =>
-        column.disableSortBy === true || column.id === 'datagridSelection' ? (
-          column.disableSortBy ? (
+        column.disableSortBy === true ||
+        column.id === 'datagridSelection' ||
+        column.isAction ? (
+          column.disableSortBy || column.isAction ? (
             column.Header
           ) : (
             <SelectAll {...instance} />
@@ -105,9 +132,16 @@ const useSortableColumns = (hooks) => {
               defaultSortableLabelText,
             })}
             aria-pressed={getAriaPressedValue(headerProp?.column)}
-            onClick={() => onSortClick(headerProp?.column)}
+            onClick={(event) => onSortClick(event, headerProp?.column)}
             kind="ghost"
-            renderIcon={(props) => icon(headerProp?.column, props)}
+            renderIcon={(props) => {
+              return (
+                <>
+                  <DatagridSlug slug={headerProp?.column?.slug} />
+                  {icon(headerProp?.column, props)}
+                </>
+              );
+            }}
             className={cx(
               `${carbon.prefix}--table-sort ${blockClass}--table-sort`,
               {
@@ -142,21 +176,6 @@ const useSortableColumns = (hooks) => {
     Object.assign(instance, { manualSortBy: !!onSort, isTableSortable: true });
   };
 
-  const getNewSortOrder = (sortOrder) => {
-    const order = {
-      newSortDesc: undefined,
-      newOrder: ordering.NONE,
-    };
-    if (sortOrder === false) {
-      order.newOrder = ordering.DESC;
-      order.newSortDesc = true;
-    }
-    if (sortOrder === undefined) {
-      order.newOrder = ordering.ASC;
-      order.newSortDesc = false;
-    }
-    return order;
-  };
   hooks.visibleColumns.push(sortableVisibleColumns);
   hooks.useInstance.push(sortInstanceProps);
 };

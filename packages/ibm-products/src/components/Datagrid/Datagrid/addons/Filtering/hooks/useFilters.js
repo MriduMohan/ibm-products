@@ -1,9 +1,8 @@
-/*
- * Licensed Materials - Property of IBM
- * 5724-Q36
- * (c) Copyright IBM Corp. 2023
- * US Government Users Restricted Rights - Use, duplication or disclosure
- * restricted by GSA ADP Schedule Contract with IBM Corp.
+/**
+ * Copyright IBM Corp. 2023, 2024
+ *
+ * This source code is licensed under the Apache-2.0 license found in the
+ * LICENSE file in the root directory of this source tree.
  */
 
 import {
@@ -12,9 +11,11 @@ import {
   DATE,
   DROPDOWN,
   INSTANT,
+  MULTISELECT,
   NUMBER,
   PANEL,
   RADIO,
+  SAVED_FILTERS,
 } from '../constants';
 import {
   Checkbox,
@@ -22,45 +23,25 @@ import {
   DatePickerInput,
   Dropdown,
   FormGroup,
+  MultiSelect,
   Layer,
   NumberInput,
   RadioButton,
   RadioButtonGroup,
 } from '@carbon/react';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useContext,
+} from 'react';
 
 import OverflowCheckboxes from '../OverflowCheckboxes';
 import { getInitialStateFromFilters } from '../utils';
 import { usePreviousValue } from '../../../../../../global/js/hooks';
-
-export const handleCheckboxChange = ({
-  checked,
-  filtersState,
-  column,
-  option,
-  setFiltersState,
-  applyFilters,
-  type,
-}) => {
-  const checkboxCopy = filtersState[column].value;
-  const foundCheckbox = checkboxCopy.find(
-    (checkbox) => checkbox.value === option.value
-  );
-  foundCheckbox.selected = checked;
-  setFiltersState({
-    ...filtersState,
-    [column]: {
-      value: checkboxCopy,
-      type,
-    },
-  });
-  applyFilters({
-    column,
-    value: [...filtersState[column].value],
-    type,
-  });
-  option.onChange?.(checked);
-};
+import { FilterContext } from '../FilterProvider';
+import { handleCheckboxChange } from '../handleCheckboxChange';
 
 const useFilters = ({
   updateMethod,
@@ -68,14 +49,18 @@ const useFilters = ({
   setAllFilters,
   variation,
   reactTableFiltersState,
-  onCancel = () => {},
+  onCancel,
   panelOpen,
   autoHideFilters,
+  isFetching,
 }) => {
+  const { state, dispatch: localDispatch } = useContext(FilterContext);
+  const { savedFilters } = state;
   /** State */
   const [filtersState, setFiltersState] = useState(
     getInitialStateFromFilters(filters, variation, reactTableFiltersState)
   );
+  const [fetchingReset, setFetchingReset] = useState(false);
 
   const [filtersObjectArray, setFiltersObjectArray] = useState(
     reactTableFiltersState
@@ -95,7 +80,7 @@ const useFilters = ({
   /** Methods */
   // If the user decides to cancel or click outside the flyout, it reverts back to the filters that were
   // there when they opened the flyout
-  const revertToPreviousFilters = () => {
+  const revertToPreviousFilters = useCallback(() => {
     setFiltersState(JSON.parse(prevFiltersRef.current));
     setFiltersObjectArray(JSON.parse(prevFiltersObjectArrayRef.current));
     setAllFilters(JSON.parse(lastAppliedFilters.current));
@@ -109,7 +94,7 @@ const useFilters = ({
     holdingPrevFiltersObjectArrayRef.current = JSON.parse(
       lastAppliedFilters.current
     );
-  };
+  }, [setAllFilters]);
 
   const reset = useCallback(() => {
     // When we reset we want the "initialFilters" to be an empty array
@@ -133,6 +118,7 @@ const useFilters = ({
     prevFiltersObjectArrayRef.current = JSON.stringify(
       initialFiltersObjectArray
     );
+    lastAppliedFilters.current = JSON.stringify([]);
   }, [filters, setAllFilters, variation]);
 
   const applyFilters = ({ column, value, type }) => {
@@ -141,81 +127,48 @@ const useFilters = ({
       return;
     }
 
-    const filtersObjectArrayCopy = [...filtersObjectArray];
+    const filterCopy = [...filtersObjectArray];
     // // check if the filter already exists in the array
-    const filter = filtersObjectArrayCopy.find((item) => item.id === column);
+    const filter = filterCopy.find((item) => item.id === column);
 
     // // if filter exists in array then update the filter's new value
     if (filter) {
       filter.value = value;
     } else {
-      filtersObjectArrayCopy.push({ id: column, value, type });
+      filterCopy.push({ id: column, value, type });
     }
 
-    // ATTENTION: this is where you would reset or remove individual filters from the filters array
-    if (type === CHECKBOX) {
-      /**
-      When all checkboxes of a group are all unselected the value still exists in the filtersObjectArray
-      This checks if all the checkboxes are selected = false and removes it from the array
-     */
-      const index = filtersObjectArrayCopy.findIndex(
-        (filter) => filter.id === column
-      );
+    const index = filterCopy.findIndex(({ id }) => id === column);
 
-      // If all the selected state is false remove from array
-      const shouldRemoveFromArray = filtersObjectArrayCopy[index].value.every(
-        (val) => val.selected === false
-      );
+    const clearCheckbox =
+      (type === CHECKBOX || type === MULTISELECT) &&
+      filterCopy[index].value.every(({ selected }) => selected === false);
+    const clearDate = type === DATE && value.length === 0;
+    const clearAny = (type === DROPDOWN || type === RADIO) && value === 'Any';
+    const clearNum = type === NUMBER && value === '';
+    const shouldClear = clearCheckbox || clearDate || clearAny || clearNum;
 
-      if (shouldRemoveFromArray) {
-        filtersObjectArrayCopy.splice(index, 1);
-      }
-    } else if (type === DATE) {
-      if (value.length === 0) {
-        /**
-        Checks to see if the date value is an empty array, if it is that means the user wants
-        to reset the date filter
-      */
-        const index = filtersObjectArrayCopy.findIndex(
-          (filter) => filter.id === column
-        );
-
-        // Remove it from the filters array since there is nothing to filter
-        filtersObjectArrayCopy.splice(index, 1);
-      }
-    } else if (type === DROPDOWN || type === RADIO) {
-      if (value === 'Any') {
-        /**
-        Checks to see if the selected value is 'Any', that means the user wants
-        to reset specific filter
-      */
-        const index = filtersObjectArrayCopy.findIndex(
-          (filter) => filter.id === column
-        );
-
-        // Remove it from the filters array
-        filtersObjectArrayCopy.splice(index, 1);
-      }
-    } else if (type === NUMBER) {
-      // If the value is empty remove it from the filtersObjectArray
-      if (value === '') {
-        // Find the column that uses number and displays an empty string
-        const index = filtersObjectArrayCopy.findIndex(
-          (filter) => filter.id === column
-        );
-
-        // Remove it from the filters array
-        filtersObjectArrayCopy.splice(index, 1);
-      }
+    if (shouldClear) {
+      filterCopy.splice(index, 1);
     }
 
-    setFiltersObjectArray(filtersObjectArrayCopy);
+    setFiltersObjectArray(filterCopy);
 
-    // // Automatically apply the filters if the updateMethod is instant
+    // Dispatch action from local filter context to track filters in order
+    // to keep history if `isFetching` becomes true. If so, react-table
+    // clears all filter history
+    localDispatch({
+      type: SAVED_FILTERS,
+      payload: {
+        savedFilters: filterCopy,
+      },
+    });
+
     if (updateMethod === INSTANT) {
-      setAllFilters(filtersObjectArrayCopy);
+      setAllFilters(filterCopy);
     }
   };
+
   /** Render the individual filter component */
   const renderFilter = ({ type, column, props: components }) => {
     let filter;
@@ -321,41 +274,49 @@ const useFilters = ({
         filter = renderCheckboxes();
         break;
       case RADIO:
-        filter = (
-          <FormGroup {...components.FormGroup}>
-            <RadioButtonGroup
-              {...components.RadioButtonGroup}
-              valueSelected={
-                filtersState[column]?.value === ''
-                  ? 'Any'
-                  : filtersState[column]?.value
-              }
-              onChange={(selected) => {
-                setFiltersState({
-                  ...filtersState,
-                  [column]: {
+        {
+          const { name } = { ...components.RadioButtonGroup };
+          filter = (
+            <FormGroup {...components.FormGroup}>
+              <RadioButtonGroup
+                {...components.RadioButtonGroup}
+                valueSelected={
+                  filtersState[column]?.value === ''
+                    ? components.DefaultRadioButton?.value ?? 'Any'
+                    : filtersState[column]?.value
+                }
+                onChange={(selected) => {
+                  setFiltersState({
+                    ...filtersState,
+                    [column]: {
+                      value: selected,
+                      type,
+                    },
+                  });
+                  applyFilters({
+                    column,
                     value: selected,
                     type,
-                  },
-                });
-                applyFilters({
-                  column,
-                  value: selected,
-                  type,
-                });
-                components.RadioButtonGroup.onChange?.(selected);
-              }}
-            >
-              <RadioButton id="any" labelText="Any" value="Any" />
-              {components.RadioButton.map((radio) => (
+                  });
+                  components.RadioButtonGroup.onChange?.(selected);
+                }}
+              >
                 <RadioButton
-                  key={radio.id ?? radio.labelText ?? radio.value}
-                  {...radio}
+                  id={components?.DefaultRadioButton?.id ?? `any__${name}`}
+                  labelText={components?.DefaultRadioButton?.labelText ?? 'Any'}
+                  value={components?.DefaultRadioButton?.value ?? 'Any'}
+                  {...components.DefaultRadioButton}
                 />
-              ))}
-            </RadioButtonGroup>
-          </FormGroup>
-        );
+                {components.RadioButton.map((radio) => (
+                  <RadioButton
+                    key={radio.id ?? radio.labelText ?? radio.value}
+                    {...radio}
+                  />
+                ))}
+              </RadioButtonGroup>
+            </FormGroup>
+          );
+        }
         break;
       case DROPDOWN:
         filter = (
@@ -385,6 +346,78 @@ const useFilters = ({
           />
         );
         break;
+      case MULTISELECT: {
+        const isStringArray =
+          components.MultiSelect.items.length &&
+          typeof components.MultiSelect.items[0] === 'string';
+        const selectedFilters = filtersState[column]?.value.filter(
+          (i) => i.selected
+        );
+        const filteredItems = components.MultiSelect.items
+          .map((item) => {
+            if (
+              selectedFilters.filter((a) =>
+                isStringArray ? a.id === item : a.id === item.id
+              ).length
+            ) {
+              return item;
+            }
+            return null;
+          })
+          .filter(Boolean);
+        filter = (
+          <MultiSelect
+            {...components.MultiSelect}
+            selectedItems={filteredItems}
+            onChange={({ selectedItems }) => {
+              const allOptions = filtersState[column].value;
+              // Find selected items from list of options
+              const foundItems = selectedItems
+                .map((item) => {
+                  if (
+                    allOptions.filter((option) =>
+                      isStringArray ? option.id === item : option.id === item.id
+                    )
+                  ) {
+                    return allOptions.filter((option) =>
+                      isStringArray ? option.id === item : option.id === item.id
+                    )[0];
+                  }
+                  return null;
+                })
+                .filter(Boolean);
+
+              // Change selected state for those items that have been selected
+              allOptions.map((a) => (a.selected = false));
+              foundItems.map((item) => {
+                const foundOriginalItem = allOptions.filter((a) =>
+                  isStringArray ? a === item : a.id === item.id
+                );
+                if (foundOriginalItem && foundOriginalItem.length) {
+                  foundOriginalItem[0].selected = true;
+                }
+              });
+              if (!selectedItems.length) {
+                allOptions.map((a) => (a.selected = false));
+              }
+              setFiltersState({
+                ...filtersState,
+                [column]: {
+                  value: allOptions,
+                  type,
+                },
+              });
+              applyFilters({
+                column,
+                value: [...filtersState[column].value],
+                type,
+              });
+              components.MultiSelect?.onChange?.(selectedItems);
+            }}
+          />
+        );
+        break;
+      }
     }
 
     if (isPanel) {
@@ -402,6 +435,7 @@ const useFilters = ({
    */
   useEffect(() => {
     if (!panelOpen && previousState?.panelOpen) {
+      revertToPreviousFilters();
       setAllFilters(holdingLastAppliedFiltersRef.current);
     }
     if (panelOpen && !previousState?.panelOpen) {
@@ -421,6 +455,47 @@ const useFilters = ({
     previousState?.panelOpen,
     reset,
     setAllFilters,
+    revertToPreviousFilters,
+  ]);
+
+  // Re-applies filters if the Datagrid goes into a fetching state while panel is open
+  // and has had filters changed without applying
+  useEffect(() => {
+    if (isFetching && !fetchingReset) {
+      setFiltersState(JSON.parse(prevFiltersRef.current));
+      setFiltersObjectArray(JSON.parse(prevFiltersRef.current));
+      setAllFilters(JSON.parse(prevFiltersObjectArrayRef.current));
+      setFetchingReset(true);
+    }
+    if (isFetching && fetchingReset) {
+      const cleanFilters = (originalFilterState) => {
+        const copy = { ...originalFilterState };
+        const updatedFilters = savedFilters.map((f) => {
+          if (Object.hasOwn(copy, f.id)) {
+            copy[f.id] = f;
+            return copy;
+          }
+          return copy;
+        });
+        return updatedFilters[0];
+      };
+      if (savedFilters && savedFilters.length) {
+        setFiltersObjectArray(savedFilters);
+        const filterStateCopy = cleanFilters(filtersState) ?? [];
+        setFiltersState(filterStateCopy);
+      }
+    }
+    if (!isFetching) {
+      setFetchingReset(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    isFetching,
+    reactTableFiltersState,
+    setAllFilters,
+    fetchingReset,
+    savedFilters,
+    filtersObjectArray,
   ]);
 
   const cancel = () => {

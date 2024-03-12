@@ -1,10 +1,11 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 /**
- * Copyright IBM Corp. 2022, 2023
+ * Copyright IBM Corp. 2022, 2024
  *
  * This source code is licensed under the Apache-2.0 license found in the
  * LICENSE file in the root directory of this source tree.
  */
+
+/* eslint-disable react-hooks/exhaustive-deps */
 
 import React, { useState } from 'react';
 import { Tooltip } from '@carbon/react';
@@ -20,13 +21,13 @@ import {
 } from '../../../../global/js/utils/story-helper';
 
 import { ARG_TYPES } from '../../utils/getArgTypes';
-import { Add } from '@carbon/react/icons';
+import { getBatchActions } from '../../Datagrid.stories';
 import { DatagridActions } from '../../utils/DatagridActions';
+import { handleFilterTagLabelText } from '../../utils/handleFilterTagLabelText';
 import { DocsPage } from './Filtering.docs-page';
 import { StatusIcon } from '../../../StatusIcon';
 import { action } from '@storybook/addon-actions';
 import { makeData } from '../../utils/makeData';
-import { pkg } from '../../../../settings';
 import styles from '../../_storybook-styles.scss';
 
 export default {
@@ -45,7 +46,12 @@ export default {
       },
     },
   },
-  excludeStories: ['FilteringUsage', 'filterProps'],
+  excludeStories: [
+    'FilteringUsage',
+    'filterProps',
+    'getDateFormat',
+    'multiSelectProps',
+  ],
 };
 
 // This is to show off the View all button in checkboxes
@@ -57,38 +63,6 @@ const dummyCheckboxes = Array(25)
     value: 'dummy-checkbox',
     disabled: true,
   }));
-
-const getBatchActions = () => {
-  return [
-    {
-      label: 'Duplicate',
-      renderIcon: () => <Add size={16} />,
-      onClick: action('Clicked batch action button'),
-    },
-    {
-      label: 'Add',
-      renderIcon: () => <Add size={16} />,
-      onClick: action('Clicked batch action button'),
-    },
-    {
-      label: 'Publish to catalog',
-      renderIcon: () => <Add size={16} />,
-      onClick: action('Clicked batch action button'),
-    },
-    {
-      label: 'Download',
-      renderIcon: () => <Add size={16} />,
-      onClick: action('Clicked batch action button'),
-    },
-    {
-      label: 'Delete',
-      renderIcon: () => <Add size={16} />,
-      onClick: action('Clicked batch action button'),
-      hasDivider: true,
-      kind: 'danger',
-    },
-  ];
-};
 
 export const FilteringUsage = ({ defaultGridProps }) => {
   const {
@@ -131,6 +105,7 @@ export const FilteringUsage = ({ defaultGridProps }) => {
     {
       Header: 'Status',
       accessor: 'status',
+      filter: 'multiSelect',
     },
     // Shows the date filter example
     {
@@ -191,17 +166,52 @@ export const FilteringUsage = ({ defaultGridProps }) => {
     useColumnCenterAlign
   );
 
-  // Warnings are ordinarily silenced in storybook, add this to test
-  pkg._silenceWarnings(false);
-  // Enable feature flag for `useFiltering` hook
-  pkg.feature['Datagrid.useFiltering'] = true;
-  pkg._silenceWarnings(true);
-
   return <Datagrid datagridState={datagridState} />;
 };
 
 const FilteringTemplateWrapper = ({ ...args }) => {
   return <FilteringUsage defaultGridProps={{ ...args }} />;
+};
+
+// Example usage of mapping locale to flatpickr date format or placeholder value (m/d/Y or mm/dd/yyyy)
+export const getDateFormat = (lang, full) => {
+  const formatObj = new Intl.DateTimeFormat(lang).formatToParts(new Date());
+  return formatObj
+    .map(({ type, value }) => {
+      switch (type) {
+        case 'day':
+          return full ? 'dd' : 'd';
+        case 'month':
+          return full ? 'mm' : 'm';
+        case 'year':
+          return full ? 'yyyy' : 'Y';
+        default:
+          return value;
+      }
+    })
+    .join('');
+};
+
+export const multiSelectProps = {
+  // items: ['relationship', 'complicated', 'single'],
+  items: [
+    { text: 'relationship', id: 'relationship' },
+    { text: 'complicated', id: 'complicated' },
+    { text: 'single', id: 'single' },
+  ],
+  id: 'carbon-multiselect-example',
+  label: 'Status selection',
+  titleText: 'Multiselect title',
+  itemToString: (item) => (item ? item.text : ''),
+  size: 'md',
+  type: 'default',
+  disabled: false,
+  hideLabel: false,
+  invalid: false,
+  warn: false,
+  open: false,
+  clearSelectionDescription: 'Total items selected: ',
+  clearSelectionText: 'To clear selection, press Delete or Backspace,',
 };
 
 export const filterProps = {
@@ -224,16 +234,18 @@ export const filterProps = {
             props: {
               DatePicker: {
                 datePickerType: 'range',
+                locale: navigator?.language || 'en',
+                dateFormat: getDateFormat(navigator?.language || 'en'),
               },
               DatePickerInput: {
                 start: {
                   id: 'date-picker-input-id-start',
-                  placeholder: 'mm/dd/yyyy',
+                  placeholder: getDateFormat(navigator?.language || 'en', true),
                   labelText: 'Joined start date',
                 },
                 end: {
                   id: 'date-picker-input-id-end',
-                  placeholder: 'mm/dd/yyyy',
+                  placeholder: getDateFormat(navigator?.language || 'en', true),
                   labelText: 'Joined end date',
                 },
               },
@@ -243,15 +255,11 @@ export const filterProps = {
         {
           filterLabel: 'Status',
           filter: {
-            type: 'dropdown',
+            type: 'multiSelect',
             column: 'status',
             props: {
-              Dropdown: {
-                id: 'marital-status-dropdown',
-                ['aria-label']: 'Marital status dropdown',
-                items: ['relationship', 'complicated', 'single'],
-                label: 'Marital status',
-                titleText: 'Marital status',
+              MultiSelect: {
+                ...multiSelectProps,
               },
             },
           },
@@ -346,6 +354,7 @@ export const filterProps = {
   onPanelOpen: action('onPanelOpen'),
   onPanelClose: action('onPanelClose'),
   panelTitle: 'Filter',
+  renderLabel: (key, value) => handleFilterTagLabelText(key, value),
   renderDateLabel: (start, end) => {
     const startDateObj = new Date(start);
     const endDateObj = new Date(end);
@@ -381,7 +390,6 @@ export const PanelInstant = prepareStory(FilteringTemplateWrapper, {
     filterProps: ARG_TYPES.filterProps,
   },
   args: {
-    featureFlags: ['Datagrid.useFiltering'],
     gridTitle: 'Data table title',
     gridDescription: 'Additional information if needed',
     useDenseHeader: false,
@@ -530,6 +538,7 @@ export const PanelInstant = prepareStory(FilteringTemplateWrapper, {
       onPanelOpen: action('onPanelOpen'),
       onPanelClose: action('onPanelClose'),
       panelTitle: 'Filter',
+      renderLabel: (key, value) => handleFilterTagLabelText(key, value),
     },
   },
 });
@@ -543,7 +552,6 @@ export const PanelWithInitialFilters = prepareStory(FilteringTemplateWrapper, {
     filterProps: ARG_TYPES.filterProps,
   },
   args: {
-    featureFlags: ['Datagrid.useFiltering'],
     initialState: {
       filters: [
         {
@@ -725,6 +733,7 @@ export const PanelWithInitialFilters = prepareStory(FilteringTemplateWrapper, {
       onPanelOpen: action('onPanelOpen'),
       onPanelClose: action('onPanelClose'),
       panelTitle: 'Filter',
+      renderLabel: (key, value) => handleFilterTagLabelText(key, value),
     },
   },
 });
@@ -738,7 +747,6 @@ export const PanelOnlyAccordions = prepareStory(FilteringTemplateWrapper, {
     filterProps: ARG_TYPES.filterProps,
   },
   args: {
-    featureFlags: ['Datagrid.useFiltering'],
     gridTitle: 'Data table title',
     gridDescription: 'Additional information if needed',
     useDenseHeader: false,
@@ -888,6 +896,7 @@ export const PanelOnlyAccordions = prepareStory(FilteringTemplateWrapper, {
       onPanelOpen: action('onPanelOpen'),
       onPanelClose: action('onPanelClose'),
       panelTitle: 'Filter',
+      renderLabel: (key, value) => handleFilterTagLabelText(key, value),
     },
   },
 });
@@ -901,7 +910,6 @@ export const PanelNoAccordions = prepareStory(FilteringTemplateWrapper, {
     filterProps: ARG_TYPES.filterProps,
   },
   args: {
-    featureFlags: ['Datagrid.useFiltering'],
     gridTitle: 'Data table title',
     gridDescription: 'Additional information if needed',
     useDenseHeader: false,
@@ -1051,6 +1059,7 @@ export const PanelNoAccordions = prepareStory(FilteringTemplateWrapper, {
       onPanelOpen: action('onPanelOpen'),
       onPanelClose: action('onPanelClose'),
       panelTitle: 'Filter',
+      renderLabel: (key, value) => handleFilterTagLabelText(key, value),
     },
   },
 });
@@ -1064,7 +1073,6 @@ export const PanelNoData = prepareStory(FilteringTemplateWrapper, {
     filterProps: ARG_TYPES.filterProps,
   },
   args: {
-    featureFlags: ['Datagrid.useFiltering'],
     data: [],
     gridTitle: 'Data table title',
     gridDescription: 'Additional information if needed',
@@ -1214,6 +1222,7 @@ export const PanelNoData = prepareStory(FilteringTemplateWrapper, {
       onPanelOpen: action('onPanelOpen'),
       onPanelClose: action('onPanelClose'),
       panelTitle: 'Filter',
+      renderLabel: (key, value) => handleFilterTagLabelText(key, value),
     },
   },
 });
@@ -1227,7 +1236,6 @@ export const PanelManyCheckboxes = prepareStory(FilteringTemplateWrapper, {
     filterProps: ARG_TYPES.filterProps,
   },
   args: {
-    featureFlags: ['Datagrid.useFiltering'],
     gridTitle: 'Data table title',
     gridDescription: 'Additional information if needed',
     useDenseHeader: false,
@@ -1377,6 +1385,7 @@ export const PanelManyCheckboxes = prepareStory(FilteringTemplateWrapper, {
       onPanelOpen: action('onPanelOpen'),
       onPanelClose: action('onPanelClose'),
       panelTitle: 'Filter',
+      renderLabel: (key, value) => handleFilterTagLabelText(key, value),
     },
   },
 });

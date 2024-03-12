@@ -3,6 +3,227 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.17.0](https://github.com/carbon-design-system/ibm-products/compare/@carbon/ibm-cloud-cognitive-core@2.16.0...@carbon/ibm-cloud-cognitive-core@2.17.0) (2024-03-12)
+
+
+### Bug Fixes
+
+* Moved Search bar from patterns to components ([#4470](https://github.com/carbon-design-system/ibm-products/issues/4470)) ([8c46b0e](https://github.com/carbon-design-system/ibm-products/commit/8c46b0ed0dac279cf6d85592d47b7c3edb8797a6))
+
+
+### Features
+
+* **Nav:** new component Nav ([#4420](https://github.com/carbon-design-system/ibm-products/issues/4420)) ([2850246](https://github.com/carbon-design-system/ibm-products/commit/28502464448794e048845a846635772514ac2ef5))
+
+
+
+
+
+# [2.16.0](https://github.com/carbon-design-system/ibm-products/compare/@carbon/ibm-cloud-cognitive-core@2.15.0...@carbon/ibm-cloud-cognitive-core@2.16.0) (2024-03-05)
+
+
+### Bug Fixes
+
+* about modal layout ([#4454](https://github.com/carbon-design-system/ibm-products/issues/4454)) ([c0cf58a](https://github.com/carbon-design-system/ibm-products/commit/c0cf58a1e78a4ee8f66b551d39b5705fecd4674e))
+* update Carbon 11 compatible versions to latest ([#4455](https://github.com/carbon-design-system/ibm-products/issues/4455)) ([c6241b2](https://github.com/carbon-design-system/ibm-products/commit/c6241b26e01eecd080d25ec3e2c6ca060a258e1d))
+
+
+### Features
+
+* add drag and drop examples/explorations ([#4448](https://github.com/carbon-design-system/ibm-products/issues/4448)) ([0543115](https://github.com/carbon-design-system/ibm-products/commit/0543115e71a5c90e85407b5c1c0bf851cf41624a))
+
+
+
+
+
+# [2.15.0](https://github.com/carbon-design-system/ibm-products/compare/@carbon/ibm-cloud-cognitive-core@2.14.1...@carbon/ibm-cloud-cognitive-core@2.15.0) (2024-02-27)
+
+
+### Features
+
+* **Decorator:** new component Decorator ([#4170](https://github.com/carbon-design-system/ibm-products/issues/4170)) ([9cea98a](https://github.com/carbon-design-system/ibm-products/commit/9cea98a32f2d169763c52d26bf123b20e886911c)), closes [#4348](https://github.com/carbon-design-system/ibm-products/issues/4348) [#4188](https://github.com/carbon-design-system/ibm-products/issues/4188) [#4227](https://github.com/carbon-design-system/ibm-products/issues/4227) [#4312](https://github.com/carbon-design-system/ibm-products/issues/4312)
+* **DescriptionList:** new component DescriptionList ([#4208](https://github.com/carbon-design-system/ibm-products/issues/4208)) ([0a55d40](https://github.com/carbon-design-system/ibm-products/commit/0a55d4092668355828cda5e44538e365baca9f2d))
+* new component status indicator ([#4419](https://github.com/carbon-design-system/ibm-products/issues/4419)) ([79c9794](https://github.com/carbon-design-system/ibm-products/commit/79c9794947fe6d58936fd4cf8a279f81870f8d5e))
+
+
+
+
+
+## [2.14.1](https://github.com/carbon-design-system/ibm-products/compare/@carbon/ibm-cloud-cognitive-core@2.14.0...@carbon/ibm-cloud-cognitive-core@2.14.1) (2024-02-21)
+
+**Note:** Version bump only for package @carbon/ibm-cloud-cognitive-core
+
+
+
+
+
+# [2.14.0](https://github.com/carbon-design-system/ibm-products/compare/@carbon/ibm-cloud-cognitive-core@2.13.0...@carbon/ibm-cloud-cognitive-core@2.14.0) (2024-02-21)
+
+
+### Features
+
+* Modal ai updates ([#4362](https://github.com/carbon-design-system/ibm-products/issues/4362)) ([8feb304](https://github.com/carbon-design-system/ibm-products/commit/8feb30433371c129652b85f357c3c89de915949a))
+
+
+
+
+
+# [2.13.0](https://github.com/carbon-design-system/ibm-products/compare/@carbon/ibm-cloud-cognitive-core@2.12.1...@carbon/ibm-cloud-cognitive-core@2.13.0) (2024-02-20)
+
+
+### Bug Fixes
+
+* update Carbon 11 compatible versions to latest ([#4343](https://github.com/carbon-design-system/ibm-products/issues/4343)) ([eee92d5](https://github.com/carbon-design-system/ibm-products/commit/eee92d57859056e07851607e67f5d81a00c3c57a))
+
+
+### Features
+
+* **BigNumbers:** new component BigNumbers ([#4174](https://github.com/carbon-design-system/ibm-products/issues/4174)) ([8053304](https://github.com/carbon-design-system/ibm-products/commit/80533047724d9a3227285110edaef9d291244d44))
+* **StringFormatter:** new component StringFormatter ([#4249](https://github.com/carbon-design-system/ibm-products/issues/4249)) ([74d67d0](https://github.com/carbon-design-system/ibm-products/commit/74d67d09f3d84e85e238eb9400d5114ba69c9518))
+
+
+
+
+
+## [2.12.1](https://github.com/carbon-design-system/ibm-products/compare/@carbon/ibm-cloud-cognitive-core@2.12.0...@carbon/ibm-cloud-cognitive-core@2.12.1) (2024-02-13)
+
+**Note:** Version bump only for package @carbon/ibm-cloud-cognitive-core
+
+
+
+
+
+# [2.12.0](https://github.com/carbon-design-system/ibm-products/compare/@carbon/ibm-cloud-cognitive-core@2.11.0...@carbon/ibm-cloud-cognitive-core@2.12.0) (2024-02-09)
+
+
+### Bug Fixes
+
+* empty state v2 storybook fix ([#4238](https://github.com/carbon-design-system/ibm-products/issues/4238)) ([38e461b](https://github.com/carbon-design-system/ibm-products/commit/38e461bc1f9b27ee5550d9bba2a0a9a6d691839e))
+* storybook static build folder update ([#4221](https://github.com/carbon-design-system/ibm-products/issues/4221)) ([a78c315](https://github.com/carbon-design-system/ibm-products/commit/a78c3150b5e566736854249e476daa623ef85396))
+
+
+### Features
+
+* add compliance footer in v2 Storybook ([#4225](https://github.com/carbon-design-system/ibm-products/issues/4225)) ([8afb1da](https://github.com/carbon-design-system/ibm-products/commit/8afb1dade0c591c1e4233f3fcd1ae32ab2854dfc))
+* **FullPageError:** create new FullPageError component ([#4211](https://github.com/carbon-design-system/ibm-products/issues/4211)) ([24afc41](https://github.com/carbon-design-system/ibm-products/commit/24afc41b83cca0c365082265130d56aa4c263695))
+* **TruncatedList:** new component TruncatedList ([#4139](https://github.com/carbon-design-system/ibm-products/issues/4139)) ([bc54d2f](https://github.com/carbon-design-system/ibm-products/commit/bc54d2f1f9a016776c6dc0b998c7a3bcbb021ccb))
+* **UserAvatar:** create UserAvatar component ([#4200](https://github.com/carbon-design-system/ibm-products/issues/4200)) ([3990523](https://github.com/carbon-design-system/ibm-products/commit/399052356b9492a9699809a715c0ee34e52cd6a3))
+
+
+
+
+
+# [2.11.0](https://github.com/carbon-design-system/ibm-products/compare/@carbon/ibm-cloud-cognitive-core@2.10.0...@carbon/ibm-cloud-cognitive-core@2.11.0) (2024-02-06)
+
+
+### Features
+
+* Gradient ai updates ([#4184](https://github.com/carbon-design-system/ibm-products/issues/4184)) ([54aa157](https://github.com/carbon-design-system/ibm-products/commit/54aa15705d613a03361476a522e242d9ff3ea5b6))
+* port Coachmark component to v2 ([#4031](https://github.com/carbon-design-system/ibm-products/issues/4031)) ([dc46cf0](https://github.com/carbon-design-system/ibm-products/commit/dc46cf02ef8c67e98c21fb0887ec704de278bd9a))
+* port InterstitialScreen component to V2 ([#4094](https://github.com/carbon-design-system/ibm-products/issues/4094)) ([827d97d](https://github.com/carbon-design-system/ibm-products/commit/827d97d36adaa4bd8a0b86b6375a78920b1da5a2))
+* **SearchBar:** Migrate SearchBar from Products v1 / Security to Products v2 ([#4202](https://github.com/carbon-design-system/ibm-products/issues/4202)) ([b8653f0](https://github.com/carbon-design-system/ibm-products/commit/b8653f0775708898160e25d55400f22900710f4a))
+
+
+
+
+
+# [2.10.0](https://github.com/carbon-design-system/ibm-products/compare/@carbon/ibm-cloud-cognitive-core@2.9.0...@carbon/ibm-cloud-cognitive-core@2.10.0) (2024-01-31)
+
+
+### Features
+
+* **Datagrid:** add ai slug support to col headers ([#4163](https://github.com/carbon-design-system/ibm-products/issues/4163)) ([f0b17e2](https://github.com/carbon-design-system/ibm-products/commit/f0b17e284ce38157bdd08543c962fb43f4090ad7))
+
+
+
+
+
+# [2.9.0](https://github.com/carbon-design-system/ibm-products/compare/@carbon/ibm-cloud-cognitive-core@2.8.3...@carbon/ibm-cloud-cognitive-core@2.9.0) (2024-01-30)
+
+
+### Features
+
+* **DelimitedList:** new component DelimitedList ([#4069](https://github.com/carbon-design-system/ibm-products/issues/4069)) ([2e60709](https://github.com/carbon-design-system/ibm-products/commit/2e60709976b08718ec437890e9721e9a1b83500c)), closes [#4047](https://github.com/carbon-design-system/ibm-products/issues/4047)
+* update ai-gradient to phase 2 spec ([#4145](https://github.com/carbon-design-system/ibm-products/issues/4145)) ([4e51d13](https://github.com/carbon-design-system/ibm-products/commit/4e51d132ae60b7aa154eaa433b1a58cdd98fbca2))
+
+
+
+
+
+## [2.8.3](https://github.com/carbon-design-system/ibm-products/compare/@carbon/ibm-cloud-cognitive-core@2.8.2...@carbon/ibm-cloud-cognitive-core@2.8.3) (2024-01-23)
+
+
+### Bug Fixes
+
+* update Carbon 11 compatible versions to latest ([#4049](https://github.com/carbon-design-system/ibm-products/issues/4049)) ([484e00c](https://github.com/carbon-design-system/ibm-products/commit/484e00c29732922fa62f4489322250c27fde0c06))
+
+
+
+
+
+## [2.8.2](https://github.com/carbon-design-system/ibm-products/compare/@carbon/ibm-cloud-cognitive-core@2.8.1...@carbon/ibm-cloud-cognitive-core@2.8.2) (2024-01-16)
+
+
+### Bug Fixes
+
+* update Carbon 11 compatible versions to latest ([#3993](https://github.com/carbon-design-system/ibm-products/issues/3993)) ([c44ff55](https://github.com/carbon-design-system/ibm-products/commit/c44ff558cc753821289bec1b4a14d96c8bc42b46))
+* update format and lint ([#4011](https://github.com/carbon-design-system/ibm-products/issues/4011)) ([8adfa5d](https://github.com/carbon-design-system/ibm-products/commit/8adfa5d49b7d5fac53fe1e336c28ee7ad4f29503))
+
+
+
+
+
+## [2.8.1](https://github.com/carbon-design-system/ibm-products/compare/@carbon/ibm-cloud-cognitive-core@2.8.0...@carbon/ibm-cloud-cognitive-core@2.8.1) (2023-12-26)
+
+**Note:** Version bump only for package @carbon/ibm-cloud-cognitive-core
+
+
+
+
+
+# [2.8.0](https://github.com/carbon-design-system/ibm-products/compare/@carbon/ibm-cloud-cognitive-core@2.7.1...@carbon/ibm-cloud-cognitive-core@2.8.0) (2023-12-19)
+
+
+### Features
+
+* community package init ([#3970](https://github.com/carbon-design-system/ibm-products/issues/3970)) ([1e31b1d](https://github.com/carbon-design-system/ibm-products/commit/1e31b1def264deaea066e270c49b35c970af5eda))
+* side panel for create and edit + type check ([#3954](https://github.com/carbon-design-system/ibm-products/issues/3954)) ([8589f2e](https://github.com/carbon-design-system/ibm-products/commit/8589f2ef537d2001f1a04cb98b8dddb915f20ef8))
+
+
+
+
+
+## [2.7.1](https://github.com/carbon-design-system/ibm-products/compare/@carbon/ibm-cloud-cognitive-core@2.7.0...@carbon/ibm-cloud-cognitive-core@2.7.1) (2023-12-12)
+
+**Note:** Version bump only for package @carbon/ibm-cloud-cognitive-core
+
+
+
+
+
+# [2.7.0](https://github.com/carbon-design-system/ibm-products/compare/@carbon/ibm-cloud-cognitive-core@2.6.2...@carbon/ibm-cloud-cognitive-core@2.7.0) (2023-12-07)
+
+
+### Features
+
+* new NonLinearReading component ([#3889](https://github.com/carbon-design-system/ibm-products/issues/3889)) ([962fbb6](https://github.com/carbon-design-system/ibm-products/commit/962fbb61ea2897db2b954afb8ebd5e721afe30c9))
+* port Guidebanner component w Carousel to v2 ([#3905](https://github.com/carbon-design-system/ibm-products/issues/3905)) ([e89a3f2](https://github.com/carbon-design-system/ibm-products/commit/e89a3f2575387e5f46338955c4aa4d07de663e3b))
+
+
+
+
+
+## [2.6.2](https://github.com/carbon-design-system/ibm-products/compare/@carbon/ibm-cloud-cognitive-core@2.6.1...@carbon/ibm-cloud-cognitive-core@2.6.2) (2023-12-05)
+
+
+### Bug Fixes
+
+* update Carbon 11 compatible versions to latest ([#3880](https://github.com/carbon-design-system/ibm-products/issues/3880)) ([b96b1f2](https://github.com/carbon-design-system/ibm-products/commit/b96b1f2982336f15f504cf75d2d50f30c88c93a9))
+
+
+
+
+
 ## [2.6.1](https://github.com/carbon-design-system/ibm-products/compare/@carbon/ibm-cloud-cognitive-core@2.6.0...@carbon/ibm-cloud-cognitive-core@2.6.1) (2023-11-30)
 
 

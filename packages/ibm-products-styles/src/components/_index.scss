@@ -1,5 +1,5 @@
 //
-// Copyright IBM Corp. 2021, 2021
+// Copyright IBM Corp. 2021, 2023
 //
 // This source code is licensed under the Apache-2.0 license found in the
 // LICENSE file in the root directory of this source tree.
@@ -7,13 +7,20 @@
 
 // Package all scss files here for those that want them all bundled up.
 
-@use './_Canary/canary';
+@use './_Canary';
 
 @use './APIKeyModal';
 @use './AboutModal';
 @use './ActionSet';
 @use './ButtonMenu';
 @use './Cascade';
+@use './Coachmark';
+@use './CoachmarkBeacon';
+@use './CoachmarkButton';
+@use './CoachmarkFixed';
+@use './CoachmarkOverlayElement';
+@use './CoachmarkOverlayElements';
+@use './CoachmarkStack';
 @use './ComboButton';
 @use './CreateFullPage';
 @use './CreateModal';
@@ -50,5 +57,22 @@
 @use './EditTearsheetNarrow';
 @use './EditFullPage';
 @use './EditUpdateCards';
+@use './Carousel';
 @use './Checklist';
+@use './Guidebanner';
 @use './InlineTip';
+@use './NonLinearReading';
+@use './BigNumbers';
+@use './TruncatedList';
+@use './InterstitialScreen';
+@use './InterstitialScreenView';
+@use './InterstitialScreenViewModule';
+@use './DelimitedList';
+@use './Decorator';
+@use './DescriptionList';
+@use './FullPageError';
+@use './SearchBar';
+@use './Nav';
+@use './StringFormatter';
+@use './UserAvatar';
+@use './StatusIndicator';

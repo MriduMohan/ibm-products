@@ -29,14 +29,29 @@ const useSelectRows = (hooks) => {
       withSelectRows: true,
     });
   });
-  hooks.visibleColumns.push((columns) => [
-    {
-      id: selectionColumnId,
-      Header: (gridState) => <SelectAll {...gridState} />,
-      Cell: (gridState) => <SelectRow {...gridState} />,
-    },
-    ...columns,
-  ]);
+  hooks.visibleColumns.push((columns) => {
+    // Ensures that the first column is the row expander in the
+    // case of selected rows and expandable rows being used together
+    const newColOrder = [...columns];
+    const expanderColumnIndex = newColOrder.findIndex(
+      (col) => col.id === 'expander'
+    );
+    const expanderCol =
+      expanderColumnIndex > -1
+        ? newColOrder.splice(expanderColumnIndex, 1)
+        : [];
+    return [
+      ...(expanderColumnIndex > -1 && expanderCol && expanderCol.length
+        ? expanderCol
+        : []),
+      {
+        id: selectionColumnId,
+        Header: (gridState) => <SelectAll {...gridState} />,
+        Cell: (gridState) => <SelectRow {...gridState} />,
+      },
+      ...newColOrder,
+    ];
+  });
 };
 
 const useHighlightSelection = (hooks) => {
@@ -74,7 +89,9 @@ const SelectRow = (datagridState) => {
     getRowId,
   } = datagridState;
 
-  const [windowSize, setWindowSize] = useState(window.innerWidth);
+  const [windowSize, setWindowSize] = useState(
+    typeof window !== 'undefined' ? window.innerWidth : ''
+  );
   useLayoutEffect(() => {
     function updateSize() {
       setWindowSize(window.innerWidth);
@@ -106,7 +123,7 @@ const SelectRow = (datagridState) => {
   const cellProps = cell.getCellProps();
   const isFirstColumnStickyLeft =
     columns[0]?.sticky === 'left' && withStickyColumn;
-  const rowId = `${tableId}-${row.index}`;
+  const rowId = `${tableId}-${row.id}-${row.index}`;
   return (
     <TableSelectRow
       {...cellProps}

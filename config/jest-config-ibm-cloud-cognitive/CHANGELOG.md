@@ -3,6 +3,41 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.5](https://github.com/carbon-design-system/ibm-products/compare/jest-config-ibm-cloud-cognitive@1.1.4...jest-config-ibm-cloud-cognitive@1.1.5) (2024-02-27)
+
+**Note:** Version bump only for package jest-config-ibm-cloud-cognitive
+
+
+
+
+
+## [1.1.4](https://github.com/carbon-design-system/ibm-products/compare/jest-config-ibm-cloud-cognitive@1.1.3...jest-config-ibm-cloud-cognitive@1.1.4) (2024-02-20)
+
+**Note:** Version bump only for package jest-config-ibm-cloud-cognitive
+
+
+
+
+
+## [1.1.3](https://github.com/carbon-design-system/ibm-products/compare/jest-config-ibm-cloud-cognitive@1.1.2...jest-config-ibm-cloud-cognitive@1.1.3) (2024-02-09)
+
+**Note:** Version bump only for package jest-config-ibm-cloud-cognitive
+
+
+
+
+
+## [1.1.2](https://github.com/carbon-design-system/ibm-products/compare/jest-config-ibm-cloud-cognitive@1.1.1...jest-config-ibm-cloud-cognitive@1.1.2) (2023-12-19)
+
+
+### Bug Fixes
+
+* add missing N2P component exports ([#3974](https://github.com/carbon-design-system/ibm-products/issues/3974)) ([a03df87](https://github.com/carbon-design-system/ibm-products/commit/a03df8742a1f462e853b95e80e080f765d8d3943))
+
+
+
+
+
 ## [1.1.1](https://github.com/carbon-design-system/ibm-products/compare/jest-config-ibm-cloud-cognitive@1.1.0...jest-config-ibm-cloud-cognitive@1.1.1) (2023-09-12)
 
 **Note:** Version bump only for package jest-config-ibm-cloud-cognitive
